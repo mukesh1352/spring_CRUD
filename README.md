@@ -150,6 +150,10 @@ bin    dev    etc    home   lib    lib64  proc   root   sys    tmp    usr  var
 ```bash
 ./mvnm spring-boot:run
 ```
+-In case of any dependency issue
+```bash
+./mvnw dependency:resolve
+```
 Testing the EndPoints
 **Create Task**
 ```bash
@@ -243,3 +247,14 @@ Example:
 }
 ```
 -----------
+### SCREENSHOTS
+- for docker version
+![docker-image](output/docker_image.png)
+
+- starting minikube
+![minikube-image](output/minkube_start.png)
+
+-see the data
+![output-image](output/spring-boot-output.png)
+- create new task
+![new task creation](output/create-new-task.png)
