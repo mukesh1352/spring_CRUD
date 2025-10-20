@@ -1,14 +1,13 @@
 package com.example.demo.Controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.example.demo.Model.TaskModel;
-import com.example.demo.Model.TaskExecution; // Import from the same package
+import com.example.demo.Model.TaskExecution;
 import com.example.demo.Service.TaskExecService;
 
 @RestController
@@ -21,34 +20,50 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-    // ✅ POST /tasks - create a new task
+    // Create a new task
     @PostMapping
     public ResponseEntity<TaskModel> createTask(@RequestBody TaskModel task) {
         try {
             TaskModel created = taskService.createOrUpdateTask(task);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
-    // GET /tasks - get all tasks
+    // Update a task
+    @PutMapping
+    public ResponseEntity<TaskModel> putTask(@RequestBody TaskModel task) {
+        try {
+            TaskModel saved = taskService.createOrUpdateTask(task);
+            return ResponseEntity.ok(saved);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // Get all tasks
     @GetMapping
     public List<TaskModel> getAllTasks() {
         return taskService.getAllTasks();
     }
 
-    // GET /tasks/{id} - get a task by ID
+    // Get task by ID
     @GetMapping("/{id}")
     public ResponseEntity<TaskModel> getTaskById(@PathVariable String id) {
-        Optional<TaskModel> task = taskService.getTaskById(id);
-        return task.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        try {
+            TaskModel task = taskService.getTaskById(id);
+            return ResponseEntity.ok(task);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
-    // GET /tasks/search?name=xyz - find tasks by name
+    // Search tasks by name
     @GetMapping("/search")
     public ResponseEntity<List<TaskModel>> findTasksByName(@RequestParam String name) {
         List<TaskModel> tasks = taskService.findTaskByName(name);
@@ -58,7 +73,7 @@ public class TaskController {
         return ResponseEntity.ok(tasks);
     }
 
-    // DELETE /tasks/{id} - delete a task
+    // Delete task
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable String id) {
         try {
@@ -69,11 +84,15 @@ public class TaskController {
         }
     }
 
-    // PUT /tasks/{id}/run - run a task command
+    // Run task in Kubernetes pod
     @PutMapping("/{id}/run")
-    public ResponseEntity<TaskExecution> runTask(@PathVariable String id) {
+    public ResponseEntity<TaskExecution> runTask(
+            @PathVariable String id,
+            @RequestParam String namespace,
+            @RequestParam String podName,
+            @RequestParam String containerName) {
         try {
-            TaskExecution execution = taskService.runTask(id);
+            TaskExecution execution = taskService.runTaskInPod(id, namespace, podName, containerName);
             return ResponseEntity.ok(execution);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
