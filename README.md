@@ -254,7 +254,7 @@ Example:
 - starting minikube
 ![minikube-image](output/minkube_start.png)
 
--see the data
+- see the data
 ![output-image](output/spring-boot-output.png)
 - create new task
 ![new task creation](output/create-new-task.png)
